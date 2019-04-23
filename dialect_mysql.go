@@ -72,8 +72,8 @@ func (d MySQLDialect) ToSqlType(val reflect.Type, maxsize int, isAutoIncr bool) 
 		return "datetime"
 	}
 
-	if maxsize < 1 {
-		maxsize = 255
+	if maxsize < 1 || maxsize > 16384 {
+		maxsize = 16384
 	}
 
 	/* == About varchar(N) ==
@@ -86,11 +86,9 @@ func (d MySQLDialect) ToSqlType(val reflect.Type, maxsize int, isAutoIncr bool) 
 	 * So it would be better to use 'text' type in stead of
 	 * large varchar type.
 	 */
-	if maxsize < 256 {
-		return fmt.Sprintf("varchar(%d)", maxsize)
-	} else {
-		return "text"
-	}
+
+	return fmt.Sprintf("varchar(%d)", maxsize)
+
 }
 
 // Returns auto_increment

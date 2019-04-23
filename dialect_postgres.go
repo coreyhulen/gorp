@@ -62,11 +62,19 @@ func (d PostgresDialect) ToSqlType(val reflect.Type, maxsize int, isAutoIncr boo
 		return "timestamp with time zone"
 	}
 
-	if maxsize > 0 {
-		return fmt.Sprintf("varchar(%d)", maxsize)
-	} else {
-		return "text"
+	if maxsize < 1 || maxsize > 16384 {
+		maxsize = 16384
 	}
+
+	/* == About varchar(N) ==
+	 * We want a unified behavior between mysql and postgres.
+	 * That's why we're not using postgres 'text' type for maxsize=0.
+	 * Note that for postgres, varchar(x) is basically 'text'
+	 * with an added constraint. This implies a small performance
+	 * hit because of the constraint check.
+	 */
+
+	return fmt.Sprintf("varchar(%d)", maxsize)
 
 }
 
